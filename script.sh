@@ -1,3 +1,4 @@
+```sh
 #!/bin/bash
 # ============================================================
 # Setup — Arch Linux + Hyprland (100% Wayland)
@@ -33,8 +34,8 @@ section() { echo -e "\n${BLUE}════════════════�
 section "Verificando requisitos"
 
 if ! command -v yay &>/dev/null; then
-    error "yay no está instalado. Instálalo primero:
-    git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si"
+    warn "yay no está instalado. Instálalo primero:"
+    git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
 fi
 ok "yay disponible"
 
@@ -93,7 +94,8 @@ PACMAN_PKGS=(
     fastfetch     # info del sistema
     yazi          # explorador de archivos en terminal
     helix         # editor modal moderno
-
+	glow          # render de markdown en la terminal
+ 
     # Editores adicionales
     nano          # editor básico en terminal
     vim           # editor modal clásico
@@ -315,20 +317,8 @@ ok "Caché de fuentes actualizado"
 # ════════════════════════════════════════════════════════════
 
 # ─────────────────────────────────────────────
-# CONFIGURACION DEL INICIADOR DE HYPRLAND
-# ─────────────────────────────────────────────
-section "Escribiendo configuración de inicio de hyprland"
-
-cat > ~/.zprofile << 'EOF'
-if [ -z "$WAYLAND_DISPLAY"] && [ "$XDG_VTNR" -eq 1 ]; then
-	exec uwsm start hyprland-uwsm.desktop 
-fi
-EOF
-
-# ─────────────────────────────────────────────
 # STARSHIP
 # ─────────────────────────────────────────────
-
 section "Escribiendo configuración de Starship"
 
 cat > ~/.config/starship.toml << 'STARSHIP_EOF'
@@ -338,13 +328,13 @@ cat > ~/.config/starship.toml << 'STARSHIP_EOF'
 palette = "themes"
 
 format = """
-[ ](bold custom_violet)\
-$hostname\
+[](bold custom_violet)\
 $os\
-$username\
-[ ](bold blue)\
+$localip\
+[  ](bold blue)\
 [ ](bold vino)\
 [ ](bold custom_orange)\
+$username\
 $directory\
 $git_branch\
 $git_commit\
@@ -373,7 +363,6 @@ $jobs\
 [](bold purple)[$character](bold italic lime_green) """
 
 right_format = """
-$localip\
 $memory_usage\
 $cmd_duration\
 $shell\
@@ -385,7 +374,7 @@ $status\
 [localip]
 ssh_only = false
 format = "[󰒍 $localipv4]($style)"
-style = "bold fg:custom_orange"
+style = "bold fg:text_two"
 disabled = false 
 
 [username] 
@@ -826,7 +815,7 @@ monitor=,preferred,auto,1
 # ─────────────────────────────────────────────
 exec-once = waybar
 exec-once = hyprpaper
-exec-once = exec-once = lxqt-policykit-agent
+exec-once = lxqt-policykit-agent
 exec-once = dunst
 exec-once = hypridle
 exec-once = dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
@@ -848,9 +837,10 @@ env = GTK_THEME,Manhattan
 #  APARIENCIA GENERAL
 # ─────────────────────────────────────────────
 general {
-    gaps_in = 2
-    gaps_out = 2
-    border_size = 2 
+    gaps_in = 3
+    gaps_out = 5
+    
+    border_size = 0 
  
     # Colores 
     col.active_border   = rgb(cf09f7) 
@@ -864,27 +854,27 @@ general {
 #  DECORACIÓN (esquinas, blur, sombras)
 # ─────────────────────────────────────────────
 decoration {
-    rounding = 10
+    rounding = 3
 
     blur {
         enabled = true
-        size = 3
-        passes = 3
+        size = 2
+        passes = 2
         new_optimizations = true
         xray = false
         noise = 0.02
-        contrast = 1
-        brightness = 1.0
+        contrast = 5
+        brightness = 0.3
         popups = true
     }
 
 
-    active_opacity   = 1
-    inactive_opacity = 0.7 
+    active_opacity   = 0.97
+    inactive_opacity = 0.8 
     fullscreen_opacity = 1 
 
     dim_inactive = true
-    dim_strength = 0.1
+    dim_strength = 0.8
 }
 
 # ─────────────────────────────────────────────
@@ -1108,8 +1098,6 @@ chmod +x ~/.config/hypr/scripts/yazi-helix.sh
 # HYPRPAPER — formato correcto
 # ─────────────────────────────────────────────
 cat > ~/.config/hypr/hyprpaper.conf << 'EOF'
-# hyprpaper.conf
-# Ajusta la ruta del wallpaper a la real
 preload = ~/Wallpapers/wallpaper.png
 wallpaper = ,~/Wallpapers/wallpaper.png
 splash = false
@@ -1227,7 +1215,7 @@ cat > ~/.config/waybar/config.jsonc << 'EOF'
   "position": "top",
   "height": 32,
   "spacing": 2,
-  "margin-top": 4,
+  "margin-top": 2,
   "margin-left": 6,
   "margin-right": 6,
 
@@ -1333,7 +1321,7 @@ cat > ~/.config/waybar/config.jsonc << 'EOF'
     "interval": 2,
     "format": "󰍛 {usage}%",
     "format-alt": "󰍛 {avg_frequency} GHz",
-    "on-click": "alacritty -e btm",
+    "on-click": "alacritty -e btop",
     "tooltip-format": "Uso: {usage}%\nFrecuencia: {avg_frequency} GHz\nCarga: {load}",
     "states": {
       "warning": 70,
@@ -1345,7 +1333,7 @@ cat > ~/.config/waybar/config.jsonc << 'EOF'
     "interval": 2,
     "format": "󰾆 {used:0.1f}G/{total:0.1f}G",
     "format-alt": "󰾆 {percentage}%",
-    "on-click": "alacritty -e btm",
+    "on-click": "alacritty -e btop",
     "tooltip-format": "RAM: {used:0.1f} / {total:0.1f} GiB ({percentage}%)\nSwap: {swapUsed:0.1f} / {swapTotal:0.1f} GiB",
     "states": {
       "warning": 70,
@@ -1407,7 +1395,6 @@ cat > ~/.config/waybar/config.jsonc << 'EOF'
     "tooltip": false
   }
 }
-
 EOF
 
 # ─────────────────────────────────────────────
@@ -1421,8 +1408,8 @@ cat > ~/.config/waybar/style.css << 'EOF'
 @define-color base   #0c001c;
 @define-color mantle #181825;
 @define-color crust  #11111b;
-@define-color tooltip #1d1826;
-@define-color tooltip-b #ec72f9;
+@define-color tooltip #0c001c;
+@define-color tooltip-b #ed0543;
 
 @define-color text     #cdd6f4;
 @define-color subtext0 #a6adc8;
@@ -1461,7 +1448,7 @@ cat > ~/.config/waybar/style.css << 'EOF'
   border: none;
   border-radius: 0;
   min-height: 0;
-  margin: 1px;
+  margin: 0.2px;
   padding: 0;
 }
 
@@ -1474,14 +1461,14 @@ window#waybar {
   background: transparent;
   border-radius: 10px;
   padding: 1px 2px;
-  margin: 2px 1px;
+  margin: 0.5px 1px;
 }
 
 .modules-center {
   background: alpha(@base, 0.85);
   padding: 1px 2px;
   border-radius: 10px;
-  margin: 2px 2px;
+  margin: 0.5px 2px;
 }
 
 /* ─────── RIGHT: contenedor transparente, cada módulo es su propio bloque ─────── */
@@ -1489,7 +1476,7 @@ window#waybar {
   background: transparent;
   border: none;
   padding: 0;
-  margin: 2px 1px;
+  margin: 0.5px 1px;
 }
 
 /* ─────── Módulos del RIGHT: cada uno es una píldora separada ─────── */
@@ -1500,21 +1487,23 @@ window#waybar {
 #temperature,
 #battery,
 #pulseaudio,
+#clock,
 #custom-powermenu {
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: bold;
   background: alpha(@base, 0.85);
   border-radius: 10px;
-  padding: 2px 10px;
-  margin: 2px 1px;
+  padding: 0.5px 10px;
   color: @text;
 }
 
 /* ─────── Network: interface + speed pegados como 1 bloque ─────── */
 #network.interface {
   background: alpha(@teal, 0.85);
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: bold;
   border-radius: 10px;
-  padding: 2px 6px 2px 10px;
+  padding: 0.5px 10px;
   margin: 2px 1px;
   color: @maroon;
 }
@@ -1529,7 +1518,7 @@ window#waybar {
 
 /* ─────── LOGO ─────── */
 #custom-logo {
-  font-size: 18px;
+  font-size: 22px;
   color: @orange;
   padding-left: 8px;
   padding-right: 8px;
@@ -1538,8 +1527,8 @@ window#waybar {
 /* ─────── WORKSPACES ─────── */
 #workspaces button {
   font-size: 17px;
-  padding: 1px 6px;
-  color: @mor;
+  padding: 0.5px 6px;
+  color: @violet;
   background: transparent;
   border-radius: 8px;
   margin: 2px 1px;
@@ -1556,7 +1545,6 @@ window#waybar {
 }
 
 #workspaces button.urgent {
-  background: alpha(@red, 0.25);
   color: @red;
   border: 1px solid alpha(@red, 0.5);
 }
@@ -1572,9 +1560,6 @@ window#waybar {
   background: @sky;
   color: @mauve;
   border-radius: 10px;
-  font-weight: bold;
-  font-size: 12px;
-  padding: 0 10px;
 }
 
 /* ─────── SSH MONITOR ─────── */
@@ -1719,15 +1704,12 @@ tooltip label {
   color: @tooltip-b;
 }
 
-
-
 /* ─────── ANIMACIÓN BLINK ─────── */
 @keyframes blink {
   to {
     opacity: 0.4;
   }
 }
-
 EOF
 
 # ─────────────────────────────────────────────
@@ -1784,8 +1766,8 @@ EOF
 
 cat > ~/.config/rofi/powermenu.rasi << 'EOF'
 * {
-    background-color:   #1d1826;
-    border-color:       #ec72f9;
+    background-color:   #0c001c;
+    border-color:       #ed0543;
     text-color:         #ec72f9;
     font:               "JetBrainsMono Nerd Font 12";
 }
@@ -1824,10 +1806,10 @@ element {
     margin:             0;
 }
 
-element selected { 
+element selected {
     border:             2px;
-    border-color:       #d10880;
-    text-color:         #d10880;
+    border-color:       #ed0543;
+
 }
 EOF
 
@@ -1857,8 +1839,8 @@ chmod u+x ~/.config/rofi/powermenu.sh
 
 cat > ~/.config/rofi/theme.rasi << 'EOF'
 * {
-    background-color:   #1d1826;
-    border-color:       #ec72f9;
+    background-color:   #0c001c;
+    border-color:       #ed0543;
     text-color:         #ec72f9;
     font:               "JetBrainsMono Nerd Font 12";
 }
@@ -1877,9 +1859,8 @@ mainbox {
 inputbar {
     padding:            8px 14px;
     border-radius:      10px;
-    background-color:   #0f121b;
     border:             1px;
-    border-color:       #ec72f9;
+    border-color:       #ed0543;
 }
 
 listview {
@@ -1897,7 +1878,7 @@ element {
 
 element selected {
     border:             1px;
-    border-color:       #f709a8;
+    border-color:       #ed0543;
     text-color:         #89b4fa;
 }
 
@@ -1925,12 +1906,13 @@ ok "Rofi configurado"
 section "Escribiendo configuración de Alacritty"
 
 cat > ~/.config/alacritty/alacritty.toml << 'EOF'
+[window]
 opacity = 0.9
 startup_mode = "Maximized"
 blur = true
 decorations = "none"  
 dynamic_padding = false
-title = "brakstirn"
+title = "wolverin"
 
 [window.padding]
 x = 0 
@@ -1966,7 +1948,7 @@ unfocused_hollow = true
 program = "/bin/zsh"
 
 [colors.primary]
-background = "0x1d1826"
+background = "0x0c001c"
 foreground = "0x1E90FF"
 
 [colors.cursor]
@@ -2052,7 +2034,81 @@ eval "$(fnm env --use-on-cd)"
 # ALIASES MODERNOS
 # ============================================
 alias cat='bat'
-alias catn='bat --style=plain'
+alias catn='bat --style=popacity = 0.9
+[font]
+size = 12.0
+
+[font.normal]
+family = "JetBrainsMono Nerd Font"
+style = "Regular"
+
+[font.bold]
+family = "JetBrainsMono Nerd Font"
+style = "Bold"
+
+[font.italic]
+family = "JetBrainsMono Nerd Font"
+style = "Italic"
+
+[font.offset]
+y = 1
+
+[cursor.style]
+shape = "Underline"
+
+[cursor]
+blink_interval = 500
+blink_timeout = 0
+unfocused_hollow = true
+
+[terminal.shell]
+program = "/bin/zsh"
+
+[colors.primary]
+background = "0x1d1826"
+foreground = "0x1E90FF"
+
+[colors.cursor]
+text = "0x14B8A6"
+cursor = "0xff79c6"
+
+[colors.normal]
+black   = "0x262324"
+red     = "0xed0543"
+green   = "0x02E358"
+yellow  = "0xFBBF24"
+blue    = "0x1047A3"
+magenta = "0xff00ff"
+cyan    = "0x00ced1"
+white   = "0xfaafbd"
+
+[[keyboard.bindings]]
+key = "V"
+mods = "Control|Shift"
+action = "Paste"
+
+[[keyboard.bindings]]
+key = "C"
+mods = "Control|Shift"
+action = "Copy"
+
+[[keyboard.bindings]]
+key = "N"
+mods = "Control|Shift"
+action = "SpawnNewInstance"
+
+[[keyboard.bindings]]
+key = "F11"
+action = "ToggleFullscreen"
+
+[[keyboard.bindings]]
+key = "F12"
+action = "ToggleFullscreen"
+
+[scrolling]
+history = 10000
+multiplier = 3
+lain'
 alias find='fd'
 alias ls='eza --icons'
 alias ll='eza -l --icons'
@@ -3086,8 +3142,8 @@ if ! grep -q "exec Hyprland" "$PROFILE_FILE" 2>/dev/null; then
     cat >> "$PROFILE_FILE" << 'PROFILE_EOF'
 
 # Iniciar Hyprland automáticamente en TTY1
-if [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" = "1" ]; then
-    exec Hyprland
+if [ -z "$WAYLAND_DISPLAY"] && [ "$XDG_VTNR" -eq 1 ]; then
+	exec uwsm start hyprland-uwsm.desktop 
 fi
 PROFILE_EOF
     ok "Inicio automático de Hyprland añadido a .zprofile"
@@ -3111,3 +3167,4 @@ echo -e "  4. Desde TTY1 Hyprland arrancará automáticamente"
 echo ""
 echo -e "${YELLOW}Recuerda:${NC} Nunca ejecutes scripts de internet sin leerlos primero."
 echo ""
+```
