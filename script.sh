@@ -1,4 +1,3 @@
-```sh
 #!/bin/bash
 # ============================================================
 # Setup — Arch Linux + Hyprland (100% Wayland)
@@ -3167,4 +3166,3 @@ echo -e "  4. Desde TTY1 Hyprland arrancará automáticamente"
 echo ""
 echo -e "${YELLOW}Recuerda:${NC} Nunca ejecutes scripts de internet sin leerlos primero."
 echo ""
-```
