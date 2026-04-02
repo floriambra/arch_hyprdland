@@ -93,7 +93,9 @@ PACMAN_PKGS=(
     fastfetch     # info del sistema
     yazi          # explorador de archivos en terminal
     helix         # editor modal moderno
-	glow          # render de markdown en la terminal
+	  glow          # render de markdown en la terminal
+    wine          # emualdor de programas para windows 
+	  wine-gecko
  
     # Editores adicionales
     nano          # editor básico en terminal
